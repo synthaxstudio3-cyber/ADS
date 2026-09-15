@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { FormatsSection } from './components/FormatsSection';
@@ -167,6 +168,9 @@ export default function App() {
           <ArrowUp className="w-5 h-5" />
         </button>
       )}
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
     </div>
   );
 }
