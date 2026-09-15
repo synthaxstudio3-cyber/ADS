@@ -165,17 +165,6 @@ export function HeroSection({ onRegisterClick }: HeroSectionProps) {
               {/* Cinematic Vignette Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#0b0e14] via-transparent to-black/40 pointer-events-none"></div>
 
-              {/* Banner Live Overlays */}
-              <div className="absolute top-4 left-4 flex flex-wrap items-center gap-2">
-                <span className="px-3 py-1 rounded-md bg-red-600/90 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md">
-                  <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-                  SEASON 01 QUALIFIERS
-                </span>
-                <span className="px-3 py-1 rounded-md bg-black/70 backdrop-blur-md border border-slate-700/80 text-amber-400 font-mono text-xs font-bold">
-                  BERMUDA • PURGATORY • KALAHARI
-                </span>
-              </div>
-
               {/* Bottom Banner Info Bar */}
               <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 text-white">
                 <div>
