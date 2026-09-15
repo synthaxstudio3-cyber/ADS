@@ -53,6 +53,7 @@ export interface PlayerRegistration {
   teammates?: { ign: string; uid: string }[];
   whatsappNumber: string;
   discordTag: string;
+  instagramHandle?: string;
   slotId: string;
   map: string;
   registeredAt: string;

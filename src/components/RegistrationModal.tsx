@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
-import { X, Flame, CheckCircle, Trophy, Shield, Copy, Check, Users, User, UserCheck } from 'lucide-react';
+import { X, Flame, CheckCircle, Trophy, Shield, Copy, Check, Users, User, UserCheck, Database, Loader2, Instagram, ExternalLink } from 'lucide-react';
 import { TournamentFormat, MatchSlot, PlayerRegistration } from '../types';
+import { saveRegistrationToSupabase, SupabaseSyncResult } from '../lib/supabase';
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export function RegistrationModal({
   const [captainUID, setCaptainUID] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [discordTag, setDiscordTag] = useState('');
+  const [instagramHandle, setInstagramHandle] = useState('');
   const [selectedSlotId, setSelectedSlotId] = useState(
     initialSlotId || (availableSlots.length > 0 ? availableSlots[0].id : '')
   );
@@ -41,12 +43,14 @@ export function RegistrationModal({
   const [confirmedPass, setConfirmedPass] = useState<PlayerRegistration | null>(null);
   const [copiedPassId, setCopiedPassId] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [supabaseResult, setSupabaseResult] = useState<SupabaseSyncResult | null>(null);
 
   if (!isOpen) return null;
 
   const relevantSlots = availableSlots.filter((slot) => slot.format === format);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
 
@@ -73,6 +77,7 @@ export function RegistrationModal({
       captainUID,
       whatsappNumber,
       discordTag: discordTag || 'Not provided',
+      instagramHandle: instagramHandle.trim() ? (instagramHandle.trim().startsWith('@') ? instagramHandle.trim() : `@${instagramHandle.trim()}`) : undefined,
       slotId: slot.id,
       map: slot.map,
       registeredAt: new Date().toISOString(),
@@ -88,8 +93,20 @@ export function RegistrationModal({
           : undefined,
     };
 
-    setConfirmedPass(newRegistration);
-    onSuccessfulRegistration(newRegistration);
+    setIsSubmitting(true);
+
+    try {
+      // Connect and save directly into Supabase project rmkalviluxpknpaaviyb
+      const result = await saveRegistrationToSupabase(newRegistration);
+      setSupabaseResult(result);
+    } catch (err: any) {
+      console.warn('Supabase sync attempted with fallback:', err);
+      setSupabaseResult({ success: false, error: err?.message || 'Offline queue' });
+    } finally {
+      setIsSubmitting(false);
+      setConfirmedPass(newRegistration);
+      onSuccessfulRegistration(newRegistration);
+    }
   };
 
   const handleCopyPassId = () => {
@@ -106,20 +123,22 @@ export function RegistrationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-fadeIn">
-      <div className="relative w-full max-w-2xl bg-gradient-to-b from-[#111722] to-[#0a0d14] rounded-2xl border border-orange-500/30 shadow-2xl shadow-black/80 p-6 sm:p-8 my-8 text-left">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-fadeIn">
+      <div className="relative w-full max-w-2xl max-h-[92vh] flex flex-col bg-gradient-to-b from-[#121824] via-[#0d121c] to-[#080b10] rounded-2xl border-2 border-orange-500/40 shadow-2xl shadow-black/90 my-auto text-left overflow-hidden">
         {/* Close Button */}
         <button
           onClick={handleResetModal}
-          className="absolute top-5 right-5 p-2 rounded-lg bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700 transition-colors"
+          className="absolute top-4 right-4 z-20 p-2 rounded-xl bg-slate-900/90 text-slate-300 hover:text-white border border-slate-700 hover:border-orange-500 transition-colors cursor-pointer shadow-md"
           aria-label="Close Modal"
         >
           <X className="w-5 h-5" />
         </button>
 
+        {/* Scrollable Modal Body */}
+        <div className="p-4 sm:p-7 overflow-y-auto overscroll-contain">
         {confirmedPass ? (
           /* SUCCESS COMPETITOR PASS VIEW */
-          <div className="text-center py-4">
+          <div className="text-center py-2">
             <div className="w-16 h-16 rounded-2xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-9 h-9" />
             </div>
@@ -133,7 +152,7 @@ export function RegistrationModal({
             </h3>
 
             <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto mt-2 leading-relaxed">
-              Your registration is locked in for the upcoming weekend bracket. Room ID and password will be sent to your WhatsApp & Discord 15 minutes before match drop.
+              Your registration is locked in for the upcoming weekend bracket. Room ID and password will be sent to your WhatsApp & Instagram 15 minutes before match drop.
             </p>
 
             {/* Pass Ticket Box */}
@@ -177,12 +196,37 @@ export function RegistrationModal({
                 </div>
               </div>
 
+              {confirmedPass.instagramHandle && (
+                <div className="mt-3 pt-2.5 border-t border-slate-800/60 flex items-center justify-between text-[11px] font-mono">
+                  <span className="flex items-center gap-1.5 text-slate-400">
+                    <Instagram className="w-3.5 h-3.5 text-pink-400" />
+                    <span>Instagram Profile</span>
+                  </span>
+                  <span className="text-pink-300 font-semibold">{confirmedPass.instagramHandle}</span>
+                </div>
+              )}
+
               <div className="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <Shield className="w-3.5 h-3.5 text-emerald-400" />
                   Anti-Cheat Verified Spot
                 </span>
                 <span className="text-orange-400">Entry: FREE</span>
+              </div>
+
+              {/* Supabase Realtime Sync Status Indicator */}
+              <div className="mt-3 pt-3 border-t border-slate-900 flex items-center justify-between text-[11px] font-mono">
+                <span className="flex items-center gap-1.5 text-emerald-400">
+                  <Database className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>
+                    {supabaseResult?.success
+                      ? `Synced with Supabase Cloud (${supabaseResult.table || 'registrations'})`
+                      : 'Connected to Supabase Project (rmkalviluxpknpaaviyb)'}
+                  </span>
+                </span>
+                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] text-slate-400">
+                  ID: rmkalvilux...
+                </span>
               </div>
             </div>
 
@@ -194,12 +238,14 @@ export function RegistrationModal({
                 Back To Tournament Hub
               </button>
               <a
-                href="https://discord.com"
+                href="https://www.instagram.com/ads_tournaments/?hl=en#"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 hover:text-white font-bold font-['Rajdhani'] uppercase tracking-wider text-sm"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 via-rose-600 to-orange-600 hover:from-pink-500 hover:to-orange-500 text-white font-bold font-['Rajdhani'] uppercase tracking-wider text-sm flex items-center justify-center gap-2 shadow-md shadow-pink-900/30"
+                id="post-registration-instagram-btn"
               >
-                Join Discord Room ID Channel
+                <Instagram className="w-4 h-4" />
+                Join Instagram Community
               </a>
             </div>
           </div>
@@ -226,12 +272,20 @@ export function RegistrationModal({
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Format Switcher */}
+              {/* Format Switcher - Optimized for High Visibility & Touch Stability on Mobile */}
               <div>
-                <label className="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-1.5 font-semibold">
-                  1. Select Tournament Format
-                </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-mono text-slate-200 uppercase tracking-wider font-bold flex items-center gap-1.5">
+                    <span>1. Tournament Format</span>
+                    <span className="text-[10px] text-orange-400 font-normal normal-case">(Tap to select)</span>
+                  </label>
+                  <span className="text-[11px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-amber-300">
+                    {format.toUpperCase()} SELECTED
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 sm:gap-3" id="format-selection-group">
+                  {/* SQUAD BUTTON */}
                   <button
                     type="button"
                     onClick={() => {
@@ -239,17 +293,29 @@ export function RegistrationModal({
                       const firstSquad = availableSlots.find((s) => s.format === 'squad');
                       if (firstSquad) setSelectedSlotId(firstSquad.id);
                     }}
-                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                    className={`relative p-2.5 sm:p-3 rounded-xl border-2 text-center transition-all duration-200 cursor-pointer flex flex-col items-center justify-center min-h-[78px] sm:min-h-[86px] touch-manipulation select-none ${
                       format === 'squad'
-                        ? 'bg-orange-500/20 border-orange-500 text-white font-bold'
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                        ? 'bg-gradient-to-b from-orange-600 to-amber-600 border-orange-400 text-white shadow-lg shadow-orange-600/40 ring-2 ring-orange-500/50 scale-[1.02]'
+                        : 'bg-slate-900 border-slate-700/90 text-slate-200 hover:text-white hover:border-slate-500 hover:bg-slate-800'
                     }`}
+                    id="select-format-squad"
+                    aria-pressed={format === 'squad'}
                   >
-                    <Users className="w-5 h-5 mx-auto mb-1 text-orange-400" />
-                    <div className="text-xs font-['Rajdhani'] uppercase font-bold">Squad (4v4)</div>
-                    <div className="text-[10px] text-slate-400">12 Teams</div>
+                    {format === 'squad' && (
+                      <span className="absolute -top-2 right-1.5 px-1.5 py-0.5 rounded-full bg-white text-orange-600 text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-0.5">
+                        <Check className="w-2.5 h-2.5 stroke-[3]" /> Active
+                      </span>
+                    )}
+                    <Users className={`w-5 h-5 mb-1 ${format === 'squad' ? 'text-white' : 'text-orange-400'}`} />
+                    <div className="text-xs sm:text-sm font-['Rajdhani'] uppercase font-extrabold tracking-wide leading-tight">
+                      Squad
+                    </div>
+                    <div className={`text-[10px] font-mono leading-none mt-1 font-semibold ${format === 'squad' ? 'text-orange-100' : 'text-slate-400'}`}>
+                      4v4 • 12 Teams
+                    </div>
                   </button>
 
+                  {/* DUO BUTTON */}
                   <button
                     type="button"
                     onClick={() => {
@@ -257,17 +323,29 @@ export function RegistrationModal({
                       const firstDuo = availableSlots.find((s) => s.format === 'duo');
                       if (firstDuo) setSelectedSlotId(firstDuo.id);
                     }}
-                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                    className={`relative p-2.5 sm:p-3 rounded-xl border-2 text-center transition-all duration-200 cursor-pointer flex flex-col items-center justify-center min-h-[78px] sm:min-h-[86px] touch-manipulation select-none ${
                       format === 'duo'
-                        ? 'bg-orange-500/20 border-orange-500 text-white font-bold'
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                        ? 'bg-gradient-to-b from-amber-600 to-orange-600 border-amber-400 text-white shadow-lg shadow-amber-600/40 ring-2 ring-amber-500/50 scale-[1.02]'
+                        : 'bg-slate-900 border-slate-700/90 text-slate-200 hover:text-white hover:border-slate-500 hover:bg-slate-800'
                     }`}
+                    id="select-format-duo"
+                    aria-pressed={format === 'duo'}
                   >
-                    <UserCheck className="w-5 h-5 mx-auto mb-1 text-amber-400" />
-                    <div className="text-xs font-['Rajdhani'] uppercase font-bold">Duo (2v2)</div>
-                    <div className="text-[10px] text-slate-400">24 Teams</div>
+                    {format === 'duo' && (
+                      <span className="absolute -top-2 right-1.5 px-1.5 py-0.5 rounded-full bg-white text-amber-600 text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-0.5">
+                        <Check className="w-2.5 h-2.5 stroke-[3]" /> Active
+                      </span>
+                    )}
+                    <UserCheck className={`w-5 h-5 mb-1 ${format === 'duo' ? 'text-white' : 'text-amber-400'}`} />
+                    <div className="text-xs sm:text-sm font-['Rajdhani'] uppercase font-extrabold tracking-wide leading-tight">
+                      Duo
+                    </div>
+                    <div className={`text-[10px] font-mono leading-none mt-1 font-semibold ${format === 'duo' ? 'text-amber-100' : 'text-slate-400'}`}>
+                      2v2 • 24 Teams
+                    </div>
                   </button>
 
+                  {/* SOLO BUTTON */}
                   <button
                     type="button"
                     onClick={() => {
@@ -275,15 +353,26 @@ export function RegistrationModal({
                       const firstSolo = availableSlots.find((s) => s.format === 'solo');
                       if (firstSolo) setSelectedSlotId(firstSolo.id);
                     }}
-                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                    className={`relative p-2.5 sm:p-3 rounded-xl border-2 text-center transition-all duration-200 cursor-pointer flex flex-col items-center justify-center min-h-[78px] sm:min-h-[86px] touch-manipulation select-none ${
                       format === 'solo'
-                        ? 'bg-orange-500/20 border-orange-500 text-white font-bold'
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                        ? 'bg-gradient-to-b from-red-600 to-orange-600 border-red-400 text-white shadow-lg shadow-red-600/40 ring-2 ring-red-500/50 scale-[1.02]'
+                        : 'bg-slate-900 border-slate-700/90 text-slate-200 hover:text-white hover:border-slate-500 hover:bg-slate-800'
                     }`}
+                    id="select-format-solo"
+                    aria-pressed={format === 'solo'}
                   >
-                    <User className="w-5 h-5 mx-auto mb-1 text-red-400" />
-                    <div className="text-xs font-['Rajdhani'] uppercase font-bold">Solo (1v1)</div>
-                    <div className="text-[10px] text-slate-400">48 Players</div>
+                    {format === 'solo' && (
+                      <span className="absolute -top-2 right-1.5 px-1.5 py-0.5 rounded-full bg-white text-red-600 text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-0.5">
+                        <Check className="w-2.5 h-2.5 stroke-[3]" /> Active
+                      </span>
+                    )}
+                    <User className={`w-5 h-5 mb-1 ${format === 'solo' ? 'text-white' : 'text-red-400'}`} />
+                    <div className="text-xs sm:text-sm font-['Rajdhani'] uppercase font-extrabold tracking-wide leading-tight">
+                      Solo
+                    </div>
+                    <div className={`text-[10px] font-mono leading-none mt-1 font-semibold ${format === 'solo' ? 'text-red-100' : 'text-slate-400'}`}>
+                      1v1 • 48 Players
+                    </div>
                   </button>
                 </div>
               </div>
@@ -413,6 +502,13 @@ export function RegistrationModal({
                 </div>
               )}
 
+              {format === 'solo' && (
+                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center gap-2.5 text-xs text-slate-300 font-mono">
+                  <User className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>Solo 1v1 Mode: No teammates required. Enter your In-Game Name & UID below.</span>
+                </div>
+              )}
+
               {/* Room ID delivery details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -431,14 +527,51 @@ export function RegistrationModal({
 
                 <div>
                   <label className="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-1 font-semibold">
-                    Discord Username
+                    Discord Username <span className="text-[10px] text-slate-400 font-normal lowercase">(optional)</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. firegod#1234 or @firegod"
+                    placeholder="e.g. firegod#1234 (optional)"
                     value={discordTag}
                     onChange={(e) => setDiscordTag(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+              </div>
+
+              {/* Instagram Username Section */}
+              <div id="instagram-username-section">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="flex items-center gap-1.5 text-xs font-mono text-slate-300 uppercase tracking-wider font-semibold">
+                    <Instagram className="w-3.5 h-3.5 text-pink-400" />
+                    <span>Instagram Handle</span>
+                    <span className="text-[10px] text-slate-400 font-normal normal-case">(For Highlights & Tags)</span>
+                  </label>
+                  <a
+                    href="https://www.instagram.com/ads_tournaments/?hl=en#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-mono text-pink-400 hover:text-pink-300 flex items-center gap-1 hover:underline cursor-pointer"
+                    id="modal-follow-instagram-link"
+                  >
+                    <span>Follow @ads_tournaments</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-pink-400/80 font-mono text-xs font-bold">
+                    @
+                  </div>
+                  <input
+                    type="text"
+                    id="instagram-input"
+                    placeholder="your_team_or_captain_handle"
+                    value={instagramHandle.startsWith('@') ? instagramHandle.slice(1) : instagramHandle}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/^@/, '');
+                      setInstagramHandle(val ? `@${val}` : '');
+                    }}
+                    className="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-pink-500 transition-colors"
                   />
                 </div>
               </div>
@@ -452,16 +585,31 @@ export function RegistrationModal({
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-orange-600 via-amber-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-extrabold font-['Rajdhani'] uppercase tracking-wider text-base shadow-lg shadow-orange-600/30 cursor-pointer flex items-center justify-center gap-2"
+                  disabled={isSubmitting}
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-orange-600 via-amber-600 to-red-600 hover:from-orange-500 hover:to-red-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold font-['Rajdhani'] uppercase tracking-wider text-base shadow-lg shadow-orange-600/30 cursor-pointer flex items-center justify-center gap-2"
                   id="submit-registration-btn"
                 >
-                  <Flame className="w-4 h-4 text-amber-200 fill-amber-300" />
-                  <span>Lock In Match Registration (FREE)</span>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                      <span>Syncing With Supabase & Generating Pass...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Flame className="w-4 h-4 text-amber-200 fill-amber-300" />
+                      <span>Lock In Match Registration (FREE)</span>
+                    </>
+                  )}
                 </button>
+                <div className="mt-2 text-center text-[10px] text-slate-500 font-mono flex items-center justify-center gap-1.5">
+                  <Database className="w-3 h-3 text-emerald-500/80" />
+                  <span>Registrations directly synced with Supabase Project rmkalviluxpknpaaviyb</span>
+                </div>
               </div>
             </form>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

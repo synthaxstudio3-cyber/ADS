@@ -11,6 +11,7 @@ import { Footer } from './components/Footer';
 import { INITIAL_MATCH_SLOTS } from './data/tournamentData';
 import { TournamentFormat, MatchSlot, PlayerRegistration } from './types';
 import { Flame, ArrowUp } from 'lucide-react';
+import { getRecentRegistrations } from './lib/supabase';
 
 export default function App() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
@@ -46,6 +47,21 @@ export default function App() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Fetch recent registrations from Supabase to sync live counters
+  useEffect(() => {
+    async function syncSupabaseData() {
+      try {
+        const remoteRegistrations = await getRecentRegistrations();
+        if (remoteRegistrations && remoteRegistrations.length > 0) {
+          setRegisteredCount((current) => Math.max(current, 128 + remoteRegistrations.length));
+        }
+      } catch (err) {
+        // Fallback silently if offline or initial table setup
+      }
+    }
+    syncSupabaseData();
   }, []);
 
   const handleOpenRegister = (format?: TournamentFormat, slotId?: string) => {

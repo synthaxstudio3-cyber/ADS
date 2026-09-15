@@ -72,7 +72,7 @@ export const INITIAL_MATCH_SLOTS: MatchSlot[] = [
     spotsTotal: 12,
     spotsFilled: 9,
     status: 'Filling Fast',
-    roomDropTime: '02:45 PM (Discord & WhatsApp)'
+    roomDropTime: '02:45 PM (Instagram & WhatsApp)'
   },
   {
     id: 'sat-slot-2',
@@ -85,7 +85,7 @@ export const INITIAL_MATCH_SLOTS: MatchSlot[] = [
     spotsTotal: 24,
     spotsFilled: 18,
     status: 'Filling Fast',
-    roomDropTime: '05:45 PM (Discord & WhatsApp)'
+    roomDropTime: '05:45 PM (Instagram & WhatsApp)'
   },
   {
     id: 'sat-slot-3',
@@ -98,7 +98,7 @@ export const INITIAL_MATCH_SLOTS: MatchSlot[] = [
     spotsTotal: 48,
     spotsFilled: 36,
     status: 'Registering',
-    roomDropTime: '08:15 PM (Discord & WhatsApp)'
+    roomDropTime: '08:15 PM (Instagram & WhatsApp)'
   },
   {
     id: 'sun-slot-1',
@@ -111,7 +111,7 @@ export const INITIAL_MATCH_SLOTS: MatchSlot[] = [
     spotsTotal: 24,
     spotsFilled: 14,
     status: 'Registering',
-    roomDropTime: '02:15 PM (Discord & WhatsApp)'
+    roomDropTime: '02:15 PM (Instagram & WhatsApp)'
   },
   {
     id: 'sun-slot-2',
@@ -124,7 +124,7 @@ export const INITIAL_MATCH_SLOTS: MatchSlot[] = [
     spotsTotal: 12,
     spotsFilled: 11,
     status: 'Filling Fast',
-    roomDropTime: '05:15 PM (Discord & WhatsApp)'
+    roomDropTime: '05:15 PM (Instagram & WhatsApp)'
   },
   {
     id: 'sun-slot-3',
@@ -137,7 +137,7 @@ export const INITIAL_MATCH_SLOTS: MatchSlot[] = [
     spotsTotal: 48,
     spotsFilled: 29,
     status: 'Registering',
-    roomDropTime: '08:15 PM (Discord & WhatsApp)'
+    roomDropTime: '08:15 PM (Instagram & WhatsApp)'
   }
 ];
 
@@ -293,7 +293,7 @@ export const TOURNAMENT_RULES = [
   'Mobile devices only (strict zero tolerance for PC Emulators / Bluestacks).',
   'Gun skins with stat boosts are strictly DISABLED to ensure competitive balance.',
   'Characters with banned passives according to global FFWS regulations are restricted.',
-  'Room ID and Password are distributed 15 minutes before match start via Discord & WhatsApp.',
+  'Room ID and Password are distributed 15 minutes before match start via Instagram & WhatsApp.',
   'Minimum Free Fire account level requirement: Level 35+ with rank history.',
   'All participants must submit in-match post-game screenshots for point verification.',
   'Anti-cheat detection or third-party config injection results in an instant permanent ban.'

@@ -131,7 +131,7 @@ export function FormatsSection({ onSelectFormat }: FormatsSectionProps) {
                     }`}
                     id={`register-format-btn-${format.id}`}
                   >
-                    <span>Register For {format.title.split(' ')[0]}</span>
+                    <span>Register For {format.id === 'squad' ? 'Squad (4v4)' : format.id === 'duo' ? 'Duo (2v2)' : 'Solo (1v1)'}</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>

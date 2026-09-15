@@ -9,12 +9,12 @@ interface FooterProps {
 export function Footer({ onRulesClick, onRegisterClick }: FooterProps) {
   const socialLinks = [
     {
-      name: 'Discord',
-      handle: 'discord.gg/ads',
-      url: 'https://discord.com',
-      icon: Send,
-      color: 'hover:text-indigo-400',
-      badge: '4.8k Members',
+      name: 'Instagram Community',
+      handle: '@ads_tournaments',
+      url: 'https://www.instagram.com/ads_tournaments/?hl=en#',
+      icon: Instagram,
+      color: 'hover:text-pink-400',
+      badge: 'Official Page',
     },
     {
       name: 'WhatsApp Community',
@@ -33,11 +33,11 @@ export function Footer({ onRulesClick, onRegisterClick }: FooterProps) {
       badge: 'Weekend Casts',
     },
     {
-      name: 'Instagram',
-      handle: '@ads.esports',
-      url: 'https://instagram.com',
-      icon: Instagram,
-      color: 'hover:text-pink-400',
+      name: 'Match Highlights',
+      handle: 'Follow Reels & MVPs',
+      url: 'https://www.instagram.com/ads_tournaments/?hl=en#',
+      icon: Award,
+      color: 'hover:text-amber-400',
       badge: 'Highlights & MVPs',
     },
   ];

@@ -1,5 +1,5 @@
-import { useState, useEffect, type FormEvent } from 'react';
-import { Flame, Trophy, ShieldAlert, Sparkles, Send, ExternalLink, Image as ImageIcon, CheckCircle, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Flame, Trophy, ShieldAlert, Sparkles, Instagram, ExternalLink, CheckCircle, Clock } from 'lucide-react';
 import defaultHeroBanner from '../assets/images/firehunt_hero_banner_1789481297600.jpg';
 
 interface HeroSectionProps {
@@ -7,10 +7,7 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ onRegisterClick }: HeroSectionProps) {
-  // Custom hero image state so the user can test their own banner link immediately if desired
-  const [heroImageSrc, setHeroImageSrc] = useState<string>(defaultHeroBanner);
-  const [customUrlInput, setCustomUrlInput] = useState('');
-  const [showImageCustomizer, setShowImageCustomizer] = useState(false);
+  const [heroImageSrc] = useState<string>(defaultHeroBanner);
 
   // Countdown to 23rd September 2026 (Kickoff date specified in prompt)
   const targetDate = new Date('2026-09-23T15:00:00+05:30').getTime();
@@ -38,20 +35,6 @@ export function HeroSection({ onRegisterClick }: HeroSectionProps) {
     const interval = setInterval(calculateTime, 1000);
     return () => clearInterval(interval);
   }, [targetDate]);
-
-  const handleApplyCustomImage = (e: FormEvent) => {
-    e.preventDefault();
-    if (customUrlInput.trim()) {
-      setHeroImageSrc(customUrlInput.trim());
-      setShowImageCustomizer(false);
-    }
-  };
-
-  const handleResetImage = () => {
-    setHeroImageSrc(defaultHeroBanner);
-    setCustomUrlInput('');
-    setShowImageCustomizer(false);
-  };
 
   return (
     <section id="hero" className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
@@ -139,16 +122,16 @@ export function HeroSection({ onRegisterClick }: HeroSectionProps) {
             </button>
 
             <a
-              href="https://discord.com"
+              href="https://www.instagram.com/ads_tournaments/?hl=en#"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-7 py-4 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 text-slate-200 hover:text-white font-bold text-base tracking-wider uppercase font-['Rajdhani'] border border-slate-700/80 hover:border-orange-500/50 transition-all duration-200 flex items-center justify-center gap-2.5 shadow-lg shadow-black/40 group"
-              id="hero-discord-btn"
+              className="w-full sm:w-auto px-7 py-4 rounded-xl bg-gradient-to-r from-[#211122]/90 via-slate-900/90 to-[#190e24]/90 hover:from-[#2e1330] hover:to-[#221035] text-slate-100 hover:text-white font-bold text-base tracking-wider uppercase font-['Rajdhani'] border border-pink-500/40 hover:border-pink-500/80 transition-all duration-200 flex items-center justify-center gap-2.5 shadow-lg shadow-black/40 group cursor-pointer"
+              id="hero-instagram-btn"
             >
-              <Send className="w-4 h-4 text-indigo-400 group-hover:text-indigo-300" />
-              <span>Join Discord Community</span>
-              <span className="ml-1 text-xs px-2 py-0.5 rounded bg-indigo-950/80 text-indigo-300 border border-indigo-700/40 font-mono">
-                4.8k Online
+              <Instagram className="w-5 h-5 text-pink-400 group-hover:text-pink-300 group-hover:scale-110 transition-transform" />
+              <span>Join Instagram Community</span>
+              <span className="ml-1 text-xs px-2 py-0.5 rounded bg-pink-950/80 text-pink-300 border border-pink-700/40 font-mono">
+                @ads_tournaments
               </span>
             </a>
           </div>
@@ -193,28 +176,12 @@ export function HeroSection({ onRegisterClick }: HeroSectionProps) {
                 </span>
               </div>
 
-              {/* User Image Customizer Button (Helpful for users replacing banner image) */}
-              <div className="absolute top-4 right-4">
-                <button
-                  onClick={() => setShowImageCustomizer(!showImageCustomizer)}
-                  className="px-3 py-1.5 rounded-lg bg-black/80 hover:bg-black text-slate-300 hover:text-white border border-slate-700 text-xs font-medium flex items-center gap-1.5 shadow-lg backdrop-blur-md transition-colors"
-                  title="Swap banner image URL or preview custom link"
-                  id="hero-image-settings-toggle"
-                >
-                  <ImageIcon className="w-3.5 h-3.5 text-orange-400" />
-                  <span>Customize Banner</span>
-                </button>
-              </div>
-
               {/* Bottom Banner Info Bar */}
               <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 text-white">
                 <div>
                   <p className="text-xs uppercase tracking-widest text-orange-400 font-mono font-bold">
                     Official Grassroots Circuit
                   </p>
-                  <h3 className="text-xl sm:text-2xl font-bold font-['Rajdhani'] uppercase tracking-wide drop-shadow-md">
-                    Road to Free Fire Pro Series 2026
-                  </h3>
                 </div>
                 <div className="flex items-center gap-3 bg-black/80 backdrop-blur-md px-3.5 py-2 rounded-xl border border-orange-500/30">
                   <Trophy className="w-5 h-5 text-amber-400" />
@@ -225,41 +192,6 @@ export function HeroSection({ onRegisterClick }: HeroSectionProps) {
                 </div>
               </div>
             </div>
-
-            {/* In-UI Image Link Input Form (Shown when clicking Customize Banner) */}
-            {showImageCustomizer && (
-              <div className="p-4 bg-slate-900 border-t border-slate-800">
-                <form onSubmit={handleApplyCustomImage} className="flex flex-col sm:flex-row gap-2">
-                  <div className="flex-1">
-                    <label className="block text-xs font-mono text-slate-300 mb-1">
-                      Replace Banner Image URL (Paste image link or asset URL):
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="https://images.unsplash.com/photo-... or custom image link"
-                      value={customUrlInput}
-                      onChange={(e) => setCustomUrlInput(e.target.value)}
-                      className="w-full px-3 py-2 rounded-md bg-slate-950 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:border-orange-500 font-mono"
-                    />
-                  </div>
-                  <div className="flex items-end gap-2">
-                    <button
-                      type="submit"
-                      className="px-4 py-2 rounded-md bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold font-['Rajdhani'] uppercase tracking-wider"
-                    >
-                      Apply Link
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleResetImage}
-                      className="px-3 py-2 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
-                    >
-                      Reset
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
           </div>
         </div>
 

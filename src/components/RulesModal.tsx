@@ -48,7 +48,7 @@ export function RulesModal({ isOpen, onClose }: RulesModalProps) {
           <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-center">
             <Clock className="w-6 h-6 text-amber-400 mx-auto mb-1.5" />
             <div className="text-xs font-bold text-white font-['Rajdhani'] uppercase">15-Min Room ID</div>
-            <div className="text-[10px] text-slate-400 font-mono">WhatsApp & Discord bot</div>
+            <div className="text-[10px] text-slate-400 font-mono">WhatsApp & Instagram</div>
           </div>
         </div>
 

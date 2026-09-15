@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Clock, MapPin, Trophy, Shield, Flame, Compass, ChevronRight, Check } from 'lucide-react';
+import { Calendar, Clock, MapPin, Trophy, Shield, Flame, Compass, ChevronRight, Check, Users, UserCheck, User } from 'lucide-react';
 import { INITIAL_MATCH_SLOTS, MAP_ROTATIONS } from '../data/tournamentData';
 import { MatchSlot, TournamentFormat } from '../types';
 
@@ -9,14 +9,16 @@ interface WeekendScheduleSectionProps {
 }
 
 export function WeekendScheduleSection({ onRegisterSlot, slots }: WeekendScheduleSectionProps) {
+  const [selectedFormatFilter, setSelectedFormatFilter] = useState<'All' | 'squad' | 'duo' | 'solo'>('All');
   const [selectedDayFilter, setSelectedDayFilter] = useState<'All' | 'Saturday' | 'Sunday'>('All');
   const [selectedMapFilter, setSelectedMapFilter] = useState<'All' | 'Bermuda' | 'Purgatory' | 'Kalahari'>('All');
   const [activeMapTab, setActiveMapTab] = useState<'Bermuda' | 'Purgatory' | 'Kalahari'>('Bermuda');
 
   const filteredSlots = slots.filter((slot) => {
+    const formatMatches = selectedFormatFilter === 'All' || slot.format === selectedFormatFilter;
     const dayMatches = selectedDayFilter === 'All' || slot.day === selectedDayFilter;
     const mapMatches = selectedMapFilter === 'All' || slot.map === selectedMapFilter;
-    return dayMatches && mapMatches;
+    return formatMatches && dayMatches && mapMatches;
   });
 
   const getMapBadgeColor = (map: string) => {
@@ -35,11 +37,11 @@ export function WeekendScheduleSection({ onRegisterSlot, slots }: WeekendSchedul
   const getFormatBadge = (format: TournamentFormat) => {
     switch (format) {
       case 'squad':
-        return { label: 'SQUAD (4v4)', color: 'bg-orange-500/20 text-orange-400 border-orange-500/40' };
+        return { label: 'SQUAD (4v4)', color: 'bg-orange-500/25 text-orange-300 border-orange-500/60', icon: Users };
       case 'duo':
-        return { label: 'DUO (2v2)', color: 'bg-amber-500/20 text-amber-400 border-amber-500/40' };
+        return { label: 'DUO (2v2)', color: 'bg-amber-500/25 text-amber-300 border-amber-500/60', icon: UserCheck };
       case 'solo':
-        return { label: 'SOLO (1v1)', color: 'bg-red-500/20 text-red-400 border-red-500/40' };
+        return { label: 'SOLO (1v1)', color: 'bg-red-500/25 text-red-300 border-red-500/60', icon: User };
     }
   };
 
@@ -62,39 +64,98 @@ export function WeekendScheduleSection({ onRegisterSlot, slots }: WeekendSchedul
           </div>
 
           {/* Filter Controls */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
-              {(['All', 'Saturday', 'Sunday'] as const).map((day) => (
+          <div className="flex flex-col gap-3">
+            {/* Format Filter Bar - Clearly visible on Mobile & Desktop */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider font-semibold">
+                Format:
+              </span>
+              <div className="flex flex-wrap gap-1.5 p-1 bg-slate-900/95 border-2 border-slate-700/80 rounded-xl">
                 <button
-                  key={day}
-                  onClick={() => setSelectedDayFilter(day)}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold font-['Rajdhani'] uppercase tracking-wider transition-colors cursor-pointer ${
-                    selectedDayFilter === day
-                      ? 'bg-orange-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                  onClick={() => setSelectedFormatFilter('All')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold font-['Rajdhani'] uppercase tracking-wider transition-all cursor-pointer ${
+                    selectedFormatFilter === 'All'
+                      ? 'bg-slate-700 text-white shadow-md'
+                      : 'text-slate-300 hover:text-white'
                   }`}
-                  id={`filter-day-${day.toLowerCase()}`}
+                  id="filter-format-all"
                 >
-                  {day === 'All' ? 'All Days' : day}
+                  All Formats
                 </button>
-              ))}
+                <button
+                  onClick={() => setSelectedFormatFilter('squad')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold font-['Rajdhani'] uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                    selectedFormatFilter === 'squad'
+                      ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md shadow-orange-600/40 border border-orange-400'
+                      : 'text-orange-400 hover:text-orange-300 bg-orange-950/40 border border-orange-800/50'
+                  }`}
+                  id="filter-format-squad"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Squad (4v4)</span>
+                </button>
+                <button
+                  onClick={() => setSelectedFormatFilter('duo')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold font-['Rajdhani'] uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                    selectedFormatFilter === 'duo'
+                      ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md shadow-amber-600/40 border border-amber-400'
+                      : 'text-amber-400 hover:text-amber-300 bg-amber-950/40 border border-amber-800/50'
+                  }`}
+                  id="filter-format-duo"
+                >
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span>Duo (2v2)</span>
+                </button>
+                <button
+                  onClick={() => setSelectedFormatFilter('solo')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold font-['Rajdhani'] uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                    selectedFormatFilter === 'solo'
+                      ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-md shadow-red-600/40 border border-red-400'
+                      : 'text-red-400 hover:text-red-300 bg-red-950/40 border border-red-800/50'
+                  }`}
+                  id="filter-format-solo"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Solo (1v1)</span>
+                </button>
+              </div>
             </div>
 
-            <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
-              {(['All', 'Bermuda', 'Purgatory', 'Kalahari'] as const).map((map) => (
-                <button
-                  key={map}
-                  onClick={() => setSelectedMapFilter(map)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold font-['Rajdhani'] uppercase tracking-wider transition-colors cursor-pointer ${
-                    selectedMapFilter === map
-                      ? 'bg-slate-700 text-amber-300'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                  id={`filter-map-${map.toLowerCase()}`}
-                >
-                  {map}
-                </button>
-              ))}
+            {/* Day & Map sub-filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
+                {(['All', 'Saturday', 'Sunday'] as const).map((day) => (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDayFilter(day)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-['Rajdhani'] uppercase tracking-wider transition-colors cursor-pointer ${
+                      selectedDayFilter === day
+                        ? 'bg-orange-600 text-white shadow-md'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                    id={`filter-day-${day.toLowerCase()}`}
+                  >
+                    {day === 'All' ? 'All Days' : day}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
+                {(['All', 'Bermuda', 'Purgatory', 'Kalahari'] as const).map((map) => (
+                  <button
+                    key={map}
+                    onClick={() => setSelectedMapFilter(map)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-['Rajdhani'] uppercase tracking-wider transition-colors cursor-pointer ${
+                      selectedMapFilter === map
+                        ? 'bg-slate-700 text-amber-300'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                    id={`filter-map-${map.toLowerCase()}`}
+                  >
+                    {map}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -128,8 +189,9 @@ export function WeekendScheduleSection({ onRegisterSlot, slots }: WeekendSchedul
                         <span>{slot.time}</span>
                       </div>
                       <div className="flex items-center gap-2 mt-2">
-                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${formatBadge.color}`}>
-                          {formatBadge.label}
+                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border flex items-center gap-1 ${formatBadge.color}`}>
+                          <formatBadge.icon className="w-3 h-3" />
+                          <span>{formatBadge.label}</span>
                         </span>
                         <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${getMapBadgeColor(slot.map)}`}>
                           <MapPin className="w-3 h-3 inline mr-1" />
@@ -180,7 +242,7 @@ export function WeekendScheduleSection({ onRegisterSlot, slots }: WeekendSchedul
                     className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold font-['Rajdhani'] text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-orange-950/40 cursor-pointer group-hover:scale-[1.01] transition-transform"
                     id={`book-slot-btn-${slot.id}`}
                   >
-                    <span>Book This Slot</span>
+                    <span>Book {slot.format.toUpperCase()} Slot</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -188,6 +250,24 @@ export function WeekendScheduleSection({ onRegisterSlot, slots }: WeekendSchedul
             );
           })}
         </div>
+
+        {filteredSlots.length === 0 && (
+          <div className="text-center py-12 px-4 rounded-2xl bg-slate-900/60 border border-slate-800 mb-16">
+            <Calendar className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+            <div className="text-lg font-bold font-['Rajdhani'] text-white uppercase">No match slots found for these filters</div>
+            <p className="text-xs text-slate-400 font-mono mt-1 mb-4">Try selecting "All Formats" or "All Days" to view upcoming tournament lobbies.</p>
+            <button
+              onClick={() => {
+                setSelectedFormatFilter('All');
+                setSelectedDayFilter('All');
+                setSelectedMapFilter('All');
+              }}
+              className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-mono font-bold uppercase transition-colors"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        )}
 
         {/* Tactical Map Rotations Breakdown */}
         <div className="rounded-2xl bg-gradient-to-b from-slate-900 to-[#0e121a] border border-orange-500/20 p-6 sm:p-8">
