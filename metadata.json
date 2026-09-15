@@ -1,0 +1,6 @@
+{
+  "name": "ADS",
+  "description": "ADS - High-energy Free Fire grassroots tournament platform featuring weekly Saturday & Sunday Squad, Duo, and Solo matches with talent scouting pipelines.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
